@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for
+import csv
 
 app = Flask(__name__)
 
@@ -45,7 +46,9 @@ class Semester:
         return total_grade_points / total_credits
 
 class Student:
-    def __init__(self, branch):
+    def __init__(self, name, prn, branch):
+        self.name = name
+        self.prn = prn
         self.branch = branch
         self.semester1 = Semester()
         self.semester2 = Semester()
@@ -76,6 +79,8 @@ def index():
     count = 0
 
     if request.method == 'POST':
+        name = request.form['student_name']
+        prn = request.form['prn_number']
         branch = request.form['branch']
         count = int(request.form.get('count', 0))
 
@@ -103,25 +108,28 @@ def index():
                 else:
                     subjects_sem2.append(subject)
 
-        student = Student(branch)
+        student = Student(name, prn, branch)
         student.add_subjects_semester1(subjects_sem1)
         student.add_subjects_semester2(subjects_sem2)
 
-        if request.form['action'] == 'Generate Result':
-            sgpa = student.semester1.calculate_sgpa() if semester == 1 else student.semester2.calculate_sgpa()
-        elif request.form['action'] == 'Generate CGPA':
-            cgpa = student.calculate_cgpa()
+        sgpa = student.semester1.calculate_sgpa() if semester == 1 else student.semester2.calculate_sgpa()
 
-        return redirect(url_for('result', sgpa=sgpa or 0, cgpa=cgpa or 0, count=count))
+        # Store data in CSV file
+        with open('student_data.csv', 'a', newline='') as csvfile:
+            fieldnames = ['Name', 'PRN', 'Branch', 'Semester', 'SGPA']
+            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+
+            writer.writerow({'Name': student.name, 'PRN': student.prn, 'Branch': student.branch, 'Semester': semester, 'SGPA': sgpa})
+
+        return redirect(url_for('result', sgpa=sgpa or 0, count=count))
 
     return render_template('index.html', count=count)
 
 @app.route('/result', methods=['GET'])
 def result():
     sgpa = request.args.get('sgpa')
-    cgpa = request.args.get('cgpa')
     count = int(request.args.get('count', 0))
-    return render_template('result.html', sgpa=sgpa, cgpa=cgpa, count=count)
+    return render_template('result.html', sgpa=sgpa, count=count)
 
 if __name__ == "__main__":
     app.run(debug=True)
