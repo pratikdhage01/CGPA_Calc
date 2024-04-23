@@ -7,24 +7,49 @@ body {
 }
 
 .container {
+    position: relative; /* Set container as relative positioning */
     max-width: 600px;
     margin: 50px auto;
     padding: 20px;
-    background-color: #333; /* Darker container background color */
+    background-color: #333;
     border-radius: 10px;
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.1); /* White shadow for contrast */
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+    text-align: center;
+}
+
+.logo,
+.logo2 {
+    background-color: #000; /* Set background color to black */
+    padding: 5px; /* Add some padding for better visibility */
+}
+
+.logo img,
+.logo2 img {
+    display: block;
+}
+
+.logo {
+    display: block;
+    margin: 0 auto 20px;
+    width: 150px;
+    height: auto;
+}
+
+.logo2 {
+    position: absolute; /* Position logo2 absolutely within container */
+    top: 10px; /* Adjust top position as needed */
+    right: 10px; /* Adjust right position as needed */
+    width: 50px; /* Adjust width as needed */
+    height: auto; /* Maintain aspect ratio */
 }
 
 h1, h2 {
-    text-align: center;
     margin-bottom: 20px;
-    color: #fff; /* Heading text color */
 }
 
 label {
     display: block;
     margin-bottom: 5px;
-    color: #fff; /* Label text color */
 }
 
 input[type="text"],
