@@ -2,7 +2,6 @@ from flask import Flask, render_template, request, redirect, url_for
 
 app = Flask(__name__)
 
-
 class Subject:
     def __init__(self, name, credits, marks, is_125_marks):
         self.name = name
@@ -11,25 +10,21 @@ class Subject:
         self.is_125_marks = is_125_marks
 
     def calculate_grade_points(self):
-        if self.marks <= 100:
-            normalized_marks = self.marks * 100 / 125 if self.is_125_marks else self.marks
-            if normalized_marks >= 90:
-                return 10
-            elif 80 <= normalized_marks < 90:
-                return 9
-            elif 70 <= normalized_marks < 80:
-                return 8
-            elif 60 <= normalized_marks < 70:
-                return 7
-            elif 50 <= normalized_marks < 60:
-                return 6
-            elif 40 <= normalized_marks < 50:
-                return 5
-            else:
-                return 0
+        normalized_marks = self.marks * 100 / 125 if self.is_125_marks else min(self.marks, 100)
+        if normalized_marks >= 90:
+            return 10
+        elif 80 <= normalized_marks < 90:
+            return 9
+        elif 70 <= normalized_marks < 80:
+            return 8
+        elif 60 <= normalized_marks < 70:
+            return 7
+        elif 50 <= normalized_marks < 60:
+            return 6
+        elif 40 <= normalized_marks < 50:
+            return 5
         else:
             return 0
-
 
 class Semester:
     def __init__(self):
@@ -48,7 +43,6 @@ class Semester:
         if total_credits == 0:
             return 0
         return total_grade_points / total_credits
-
 
 class Student:
     def __init__(self, branch):
@@ -72,9 +66,8 @@ class Student:
         total_credits = total_credits_sem1 + total_credits_sem2
         if total_credits == 0:
             return 0
-        cgpa = ((sgpa_sem1 * total_credits_sem1) + (sgpa_sem2 * total_credits_sem2)) / total_credits
+        cgpa = ((sgpa_sem1 * total_credits_sem1) + (sgpa_sem2 * total_credits_sem2)) / total_credits 
         return cgpa
-
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -114,15 +107,14 @@ def index():
         student.add_subjects_semester1(subjects_sem1)
         student.add_subjects_semester2(subjects_sem2)
 
-        if request.form['action'] == 'sgpa':
+        if request.form['action'] == 'Generate Result':
             sgpa = student.semester1.calculate_sgpa() if semester == 1 else student.semester2.calculate_sgpa()
-        elif request.form['action'] == 'cgpa':
+        elif request.form['action'] == 'Generate CGPA':
             cgpa = student.calculate_cgpa()
 
         return redirect(url_for('result', sgpa=sgpa or 0, cgpa=cgpa or 0, count=count))
 
     return render_template('index.html', count=count)
-
 
 @app.route('/result', methods=['GET'])
 def result():
@@ -130,7 +122,6 @@ def result():
     cgpa = request.args.get('cgpa')
     count = int(request.args.get('count', 0))
     return render_template('result.html', sgpa=sgpa, cgpa=cgpa, count=count)
-
 
 if __name__ == "__main__":
     app.run(debug=True)
